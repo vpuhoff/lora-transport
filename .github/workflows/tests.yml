@@ -46,7 +46,9 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -D CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE=ON -D CMAKE_CXX_FLAGS="-DARDUINO_ARCH_ESP32 -I${{ github.workspace }}/src -I$HOME/Arduino/libraries" ..
+        cmake \
+          -D CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE=ON \
+          -D CMAKE_CXX_FLAGS="-DARDUINO_ARCH_ESP32 -I${{ github.workspace }}/src -I$HOME/Arduino/libraries -I$HOME/.arduino15/packages/esp32/hardware/esp32/2.0.x/libraries" ..
         ls -la ${{ github.workspace }}/src
 
     - name: Build tests
