@@ -43,10 +43,18 @@ namespace LoRaReliable {
            , currentMode(Mode::RX) {}
 
        bool begin() {
-           if (!transport->begin(config)) return false;
-           if (!timeManager->begin()) return false;
-           return true;
-       }
+            try {
+                config.validate();
+            } catch (const std::out_of_range& e) {
+                Serial.println(e.what());
+                return false;
+            }
+
+            if (!transport->begin(config)) return false;
+            if (!timeManager->begin()) return false;
+            return true;
+        }
+
 
        template<typename T>
        bool send(const T& data) {
