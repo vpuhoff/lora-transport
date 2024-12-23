@@ -1,0 +1,46 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ libgtest-dev
+
+    - name: Build Google Test
+      run: |
+        mkdir -p /tmp/gtest
+        cd /tmp/gtest
+        cmake /usr/src/googletest
+        make
+        sudo mv lib/*.a /usr/lib
+
+    - name: Configure project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+
+    - name: Build tests
+      run: |
+        cd build
+        make
+
+    - name: Run tests
+      run: |
+        cd build
+        ./test_runner
