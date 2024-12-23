@@ -34,11 +34,12 @@ jobs:
         mkdir build
         cd build
         cmake -D CMAKE_INCLUDE_PATH=${{ github.workspace }}/src ..
+        ls -la ${{ github.workspace }}/src
 
     - name: Build tests
       run: |
         cd build
-        make
+        make VERBOSE=1
 
     - name: Run tests
       run: |
