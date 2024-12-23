@@ -33,7 +33,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ..
+        cmake -D CMAKE_INCLUDE_PATH=${{ github.workspace }}/src ..
 
     - name: Build tests
       run: |
