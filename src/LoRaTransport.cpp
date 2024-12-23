@@ -19,17 +19,29 @@ namespace LoRaReliable {
     }
 
     bool LoRaTransport::send(const uint8_t* data, size_t size) {
+        if (data == nullptr || size == 0) {
+            Serial.println("Error: Invalid data pointer or size for sending.");
+            return false;
+        }
+
         LoRa.beginPacket();
         LoRa.write(data, size);
         return LoRa.endPacket();
     }
 
+
     size_t LoRaTransport::receive(uint8_t* buffer, size_t maxSize) {
+        if (buffer == nullptr || maxSize == 0) {
+            Serial.println("Error: Invalid buffer pointer or size for receiving.");
+            return 0;
+        }
+
         int packetSize = LoRa.parsePacket();
-        if (!packetSize) return 0;
-        
+        if (packetSize <= 0) return 0;
+
         return LoRa.readBytes(buffer, std::min(maxSize, (size_t)packetSize));
     }
+
 
     void LoRaTransport::startReceive() {
         LoRa.receive();

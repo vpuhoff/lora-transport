@@ -95,10 +95,19 @@ namespace LoRaReliable {
 
     PacketIntegrity ReedSolomonCodec::decode(uint8_t* data, size_t size) {
         PacketIntegrity integrity = {0, 0, 0};
-        
+
+        // Check for valid size
+        if (size < RS_PARITY_SIZE || size > RS_BLOCK_SIZE) {
+            integrity.errorRate = 100.0f;
+            integrity.signalQuality = 0.0f;
+            integrity.recoveryRate = 0.0f;
+            return integrity;
+        }
+
         uint8_t syndromes[RS_PARITY_SIZE];
         bool hasErrors = false;
 
+        // Calculate syndromes
         for (int i = 0; i < RS_PARITY_SIZE; i++) {
             syndromes[i] = data[0];
             for (size_t j = 1; j < size; j++) {
@@ -108,12 +117,13 @@ namespace LoRaReliable {
         }
 
         if (!hasErrors) {
-            integrity.errorRate = 0;
-            integrity.signalQuality = 1.0;
-            integrity.recoveryRate = 100.0;
+            integrity.errorRate = 0.0f;
+            integrity.signalQuality = 1.0f;
+            integrity.recoveryRate = 100.0f;
             return integrity;
         }
 
+        // Attempt error correction
         uint8_t lambda[RS_PARITY_SIZE + 1] = {1};
         uint8_t omega[RS_PARITY_SIZE] = {0};
 
@@ -135,6 +145,7 @@ namespace LoRaReliable {
                 for (int j = 0; j < RS_PARITY_SIZE; j++) {
                     numerator ^= gfMultiply(omega[j], gf_exp[(j * i) % 255]);
                 }
+                if (denominator == 0) continue; // Avoid division by zero
                 data[i] ^= gfMultiply(numerator, denominator);
                 errors++;
             }
@@ -146,6 +157,7 @@ namespace LoRaReliable {
 
         return integrity;
     }
+
 
     uint32_t ReedSolomonCodec::calculateChecksum(const uint8_t* data, size_t size) {
         CRC32 crc;
